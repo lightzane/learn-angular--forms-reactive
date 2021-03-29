@@ -1,0 +1,168 @@
+<h1>Demo Angular: Reactive Forms</h1>
+<p>These are using <code>formGroup</code>. (ReactiveFormsModule) @angular/forms</p>
+<hr>
+<h2>Please populate or modify the following fields:</h2>
+<p color="accent">*<em>and observe the changes in the output below, take note of the comments as seen in the field's hint</em></p>
+
+
+<mat-card>
+  <form [formGroup]="sampleForm">
+    
+    <h3>Account information</h3>
+
+    <input type="text" [class.is-invalid]="sampleForm.errors?.mismatch" value="Change color @passwords are mismatched" style="width:500px;">
+
+    <p>
+      <mat-form-field appearance="outline">
+        <mat-label>Username</mat-label>
+        <input matInput placeholder="Placeholder" formControlName="username" required> <!-- the required here is only for the UI for material to add the "*" -->
+        <mat-icon matSuffix>sentiment_very_satisfied</mat-icon>
+        <mat-hint>Uses Validators @angular/forms</mat-hint>
+        <mat-error *ngIf="username.errors?.required">Required field po ito</mat-error>
+        <mat-error *ngIf="username.errors?.minlength">Minimum length is {{ username.errors.minlength.requiredLength }}</mat-error>
+        <mat-error *ngIf="username.errors?.pattern">Enter alphabet letters only!</mat-error>
+        
+        <!-- below contains my custom validations! n_n -->
+        <mat-error *ngIf="username.errors?.forbiddenName">Username <strong>{{ username.errors.forbiddenName.value }}</strong> not allowed</mat-error>
+        <mat-error *ngIf="username.errors?.otherForbiddenName">Username <strong>{{ username.errors.otherForbiddenName.otherValue }}</strong> not allowed</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Enter your password</mat-label>
+        <input matInput [type]="hide ? 'password' : 'text'" formControlName="password">
+        <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
+          <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+        
+        <mat-hint>Uses <strong>cross-field</strong> validation --></mat-hint>
+      </mat-form-field>
+
+      <!-- Crossfield validation example: password and confirm password fields -->
+      <mat-form-field appearance="outline">
+        <mat-label>Confirm your password</mat-label>
+        <input matInput [type]="hide ? 'password' : 'text'" formControlName="confirmPassword">
+        
+        <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
+          <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+
+        <!-- alternative, because see next comment -->
+        <mat-hint style="color:red" *ngIf="sampleForm.errors?.mismatch">Password mismatch</mat-hint>
+        
+        <!-- below line does not work quite easily in material.angular perspective -->
+        <mat-error *ngIf="sampleForm.errors?.mismatch">This doesn't work due to the error and validation being in the "form-level" and not literally on the control</mat-error>
+      </mat-form-field>
+    </p>
+
+    <br><hr>
+    <h3>Address information</h3>
+    <div formGroupName="address">
+      <p>
+        <mat-form-field appearance="fill">
+          <mat-label>Street</mat-label>
+          <input matInput placeholder="Enter your street address" formControlName="street">
+          <mat-hint>Hint</mat-hint>
+        </mat-form-field>
+  
+        <mat-form-field appearance="fill">
+          <mat-label>City</mat-label>
+          <input matInput placeholder="Enter your city address" formControlName="city">
+          <mat-hint>Hint</mat-hint>
+        </mat-form-field>
+  
+        <mat-form-field appearance="fill">
+          <mat-label>Postal code</mat-label>
+          <input matInput placeholder="Enter your postal code" formControlName="postalCode" required>
+          <mat-hint>Uses Validators @angular/forms</mat-hint>
+          <mat-error *ngIf="sampleForm.get('address').get('postalCode').errors?.pattern">Please enter a 5-digit number only</mat-error>
+          <mat-error *ngIf="postalCode.errors?.required">This is a required field!</mat-error>
+          <!-- 
+            can write a shorter syntax in component
+
+            get postalCode() {
+              return this.sampleForm.get('address').get('postalCode')
+            }
+
+            result:
+            *ngIf = "postalCode.errors?.required"\
+
+            *** note ***
+            postalCode.errors && postalCode.errors.required
+            can be shorten into:
+              postalCode.errors?.required
+          -->
+
+        </mat-form-field>
+  
+      </p>
+    </div>
+
+    <br><hr>
+    <h3>Subscription</h3>
+
+    <!-- Conditional Validation starts on this checkbox and the email: -->
+    <mat-checkbox class="example-margin" formControlName="subscription">Subscribe me to UAENA</mat-checkbox>
+
+    <p>
+      <mat-form-field appearance="fill">
+        <mat-label>{{ sampleForm.value.subscription ? 'Email (required)' : 'Email (optional)' }}</mat-label>
+        <input matInput placeholder="Placeholder" formControlName="email" [required]="sampleForm.value.subscription">
+        <mat-icon matSuffix>email</mat-icon>
+        <mat-hint>Required only when checkbox is true <br> This is <strong>conditional</strong> validation</mat-hint>
+        <mat-error *ngIf="email.errors?.required">This is a required field na</mat-error>
+        <mat-error *ngIf="email.errors?.email">Maling email format</mat-error>
+      </mat-form-field>
+    </p>
+
+    <!-- Dynamic forms: adding/removing additional fields -->
+    <div class="wrapper" *ngIf="sampleForm.value.subscription">
+      <div formArrayName="altEmails" *ngFor="let e of altEmails.controls; let i = index">
+        <mat-form-field appearance="fill">
+          <mat-label>Email at index position <strong>{{ i }}</strong>:</mat-label>
+          <!-- need to bind the [formControlName] to the index property -->
+          <input matInput placeholder="Placeholder" [formControlName]="i"> 
+          <mat-icon matSuffix>email</mat-icon>
+        </mat-form-field>
+  
+        <button mat-icon-button color="warn" (click)="removeAltEmail(i)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+    
+    <p *ngIf="sampleForm.value.subscription">
+      <button (click)="addAltEmails()" mat-button color="accent"><mat-icon>add</mat-icon>Add alternative emails</button>
+    </p>
+
+    <br><hr>
+    <p style="text-align:right">
+      <button (click)="loadData()" style="float:left" mat-raised-button color="accent">Load some Required data</button>
+      <button [disabled]="sampleForm.invalid || submitted" (click)="sampleFormSubmit()" type="submit" mat-raised-button color="primary">{{ submitted ? 'Submitted' : 'Submit'  }}</button>
+    </p>
+  </form>
+
+</mat-card>
+
+<br><br>
+<h1>Results</h1>
+
+<p><strong>formGroup</strong> output:</p>
+<pre>{{ sampleForm.value | json }}</pre>
+
+<br><br>
+<hr>
+<h1>Important note</h1>
+<pre>
+    It looks like you're using ngModel on the same form field as formControl.
+    Support for using the ngModel input property and ngModelChange event with
+    reactive form directives has been deprecated in Angular v6 and will be removed
+    in a future version of Angular.
+
+    For more information on this, see our API docs here:
+    https://angular.io/api/forms/FormControlDirective#use-with-ngmodel
+</pre>
+
+<footer>
+  <p><strong>References</strong></p>
+  <p>Angular Forms Tutorial - 16 --> 27<br><a href="https://youtube.com/playlist?list=PLC3y8-rFHvwhwL-XH04cHOpJnkgRKykFi" target="_blank">https://youtube.com/playlist?list=PLC3y8-rFHvwhwL-XH04cHOpJnkgRKykFi <mat-icon>launch</mat-icon></a></p>
+</footer>

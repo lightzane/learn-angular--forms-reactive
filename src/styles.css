@@ -1,0 +1,17 @@
+/* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+body { padding: 50px 100px; background-color: rgb(245, 245, 245); }
+
+footer {
+    margin-top: 5%;
+    border-top: 1px solid #ccc;
+    padding-top: 30px;
+    padding-bottom: 30%;
+}
+
+footer mat-icon {
+    font-size: 1em !important;
+}

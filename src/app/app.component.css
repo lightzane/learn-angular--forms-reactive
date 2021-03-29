@@ -1,0 +1,12 @@
+mat-radio-button {
+    display: flex;
+    margin: 10px;
+}
+
+mat-form-field {
+    margin: 10px;
+}
+
+.is-invalid {
+    color:red;
+}
